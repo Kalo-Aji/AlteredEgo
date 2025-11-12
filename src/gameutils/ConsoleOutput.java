@@ -1232,8 +1232,199 @@ public class ConsoleOutput {
     }
 
     public void arcadeBattleGameMode() {
-        System.out.println("PLAYER VS COMPUTER BATTLE GAME MODE LOGIC HERE....");
+        Player player = new Player();
+        Enemy enemy = new Enemy();
+        Random random = new Random();
+
+        System.out.println();
+        printCenter(" [MODE] ARCADE MODE ", len, '-', mediumDelayPreset);
+        printCenter(" DEFEAT ALL ENEMIES! ", len, '-', mediumDelayPreset);
+
+
+        int playerChoice = playerCharacterChoiceInputHandler();
+        switch (playerChoice) {
+            case 1 -> player = new Player("Cosmic Dassel", "Provoked Punch", "Bug Overflow", "Overclock");
+            case 2 -> player = new Player("Khylle The Reaper", "Karate Kick", "Flying Food", "Voice of Destruction");
+            case 3 -> player = new Player("Earl", "Knee Strike", "Double Kick", "Dodge");
+            case 4 -> player = new Player("The One John", "Upper Cut", "Counterpalm", "Flaring Punches");
+            case 5 -> player = new Player("And Rew", "Dragon Fist", "Dragon First Missiles", "Dragon's Verdict of Demise");
+            case 6 -> player = new OPCharacter("OP Character", "OP Skill One", "OP Skill Two", "OP Skill Three");
+        }
+
+        printOrSkipNarrativeSegment(player);
+
+
+        List<Integer> remainingEnemies = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+
+
+        while (!remainingEnemies.isEmpty()) {
+            int enemyIndex = remainingEnemies.get(random.nextInt(remainingEnemies.size()));
+            boolean playerAlive = true;
+
+
+            switch (enemyIndex) {
+                case 1 -> enemy = new Enemy("Kaniel Outis", "Image Burn", "Spirit Compression", "Sanity Drain");
+                case 2 -> enemy = new Enemy("Van Berskville", "Stab", "Getsuga", "Fang Sword Style");
+                case 3 -> enemy = new Enemy("Asta Clover", "Demon Slayer Slash", "Demon Dweller Double Slash", "Demon Union");
+                case 4 -> enemy = new Enemy("JF Void", "Void Chop", "Void Deflect", "Void Stagger Palm");
+                case 5 -> enemy = new Enemy("Deidre", "Lightning Cut", "Thunder Cleave", "Final Turn");
+            }
+
+            printOrSkipNarrativeSegment(enemy);
+            if (playerChoice == enemyIndex) specialEncounterCounterPart(player, enemy);
+
+            int round = 1;
+            boolean isRunning = true;
+
+
+            do {
+                showRoundStatus(round, player, enemy);
+
+
+                System.out.println();
+                System.out.println("----------- Player's Turn -----------");
+                printWithDelay("[" + player.getName() + "] Health: " + player.getHitpoints(), fastDelayPreset);
+                printWithDelay("[" + player.getName() + "] Mana: " + player.getMana(), fastDelayPreset);
+
+                int playerSkillChoice = -1;
+                boolean playerActed = false;
+
+                while (!playerActed) {
+                    try {
+                        playerSkillChoices(player);
+                        playerSkillChoice = scanner.nextInt();
+                        if (playerSkillChoice < 0 || playerSkillChoice > 3) throw new InputMismatchException();
+                    } catch (InputMismatchException e) {
+                        System.out.println("\n\t\tInvalid Input, Try Again!");
+                        scanner.nextLine();
+                        continue;
+                    }
+
+                    playerSkillUseMonologue(player, playerSkillChoice);
+
+                    switch (playerSkillChoice) {
+                        case 0 -> { enemy.setHitpoints(player.basicAttack()); playerActed = true; }
+                        case 1 -> {
+                            if (player.getSkillOneCooldown() > 0) printWithDelay("\nSkill on cooldown!", fastDelayPreset);
+                            else if (!player.isSkillOneUsable()) printWithDelay("\nNot enough mana!", fastDelayPreset);
+                            else {
+                                enemy.setHitpoints(player.skillOne());
+                                player.reduceMana(player.getSkillOneManaUsage());
+                                player.activateSkillOneCooldown();
+                                playerActed = true;
+                            }
+                        }
+                        case 2 -> {
+                            if (player.getSkillTwoCooldown() > 0) printWithDelay("\nSkill on cooldown!", fastDelayPreset);
+                            else if (!player.isSkillTwoUsable()) printWithDelay("\nNot enough mana!", fastDelayPreset);
+                            else {
+                                enemy.setHitpoints(player.skillTwo());
+                                player.reduceMana(player.getSkillTwoManaUsage());
+                                player.activateSkillTwoCooldown();
+                                playerActed = true;
+                            }
+                        }
+                        case 3 -> {
+                            if (player.getSkillThreeCooldown() > 0) printWithDelay("\nSkill on cooldown!", fastDelayPreset);
+                            else if (!player.isSkillThreeUsable()) printWithDelay("\nNot enough mana!", fastDelayPreset);
+                            else {
+                                enemy.setHitpoints(player.skillThree());
+                                player.reduceMana(player.getSkillThreeManaUsage());
+                                player.activateSkillThreeCooldown();
+                                playerActed = true;
+                            }
+                        }
+                    }
+                }
+
+                if (enemy.getHitpoints() <= 0) {
+                    printWithDelay("\n" + enemy.getName() + " has been defeated!", fastDelayPreset);
+                    isRunning = false;
+                    break;
+                }
+
+
+                int enemySkillChoice = random.nextInt(0, 4);
+                enemySkillUseMonologue(enemy, enemySkillChoice);
+
+                switch (enemySkillChoice) {
+                    case 0 -> player.setHitpoints(enemy.basicAttack());
+                    case 1 -> {
+                        if (enemy.getSkillOneCooldown() == 0 && enemy.isSkillOneUsable()) {
+                            player.setHitpoints(enemy.skillOne());
+                            enemy.reduceMana(enemy.getSkillOneManaUsage());
+                            enemy.activateSkillOneCooldown();
+                        } else player.setHitpoints(enemy.basicAttack());
+                    }
+                    case 2 -> {
+                        if (enemy.getSkillTwoCooldown() == 0 && enemy.isSkillTwoUsable()) {
+                            player.setHitpoints(enemy.skillTwo());
+                            enemy.reduceMana(enemy.getSkillTwoManaUsage());
+                            enemy.activateSkillTwoCooldown();
+                        } else player.setHitpoints(enemy.basicAttack());
+                    }
+                    case 3 -> {
+                        if (enemy.getSkillThreeCooldown() == 0 && enemy.isSkillThreeUsable()) {
+                            player.setHitpoints(enemy.skillThree());
+                            enemy.reduceMana(enemy.getSkillThreeManaUsage());
+                            enemy.activateSkillThreeCooldown();
+                        } else player.setHitpoints(enemy.basicAttack());
+                    }
+                }
+
+                player.reduceSkillOneCooldown();
+                player.reduceSkillTwoCooldown();
+                player.reduceSkillThreeCooldown();
+
+                enemy.reduceSkillOneCooldown();
+                enemy.reduceSkillTwoCooldown();
+                enemy.reduceSkillThreeCooldown();
+
+                if (player.getHitpoints() <= 0) {
+                    printWithDelay("\n" + player.getName() + " has been defeated!", fastDelayPreset);
+                    playerAlive = false;
+                    isRunning = false;
+                }
+
+            } while (isRunning);
+
+
+            if (playerAlive) {
+                printWithDelay("\n" + player.getName() + " wins this battle!", mediumDelayPreset);
+                remainingEnemies.remove(Integer.valueOf(enemyIndex));
+                player.reduceSkillOneCooldown();
+                player.reduceSkillTwoCooldown();
+                player.reduceSkillThreeCooldown();
+                printWithDelay("\nPrepare for your next opponent!\n", fastDelayPreset);
+            } else {
+                char retryChoice = ' ';
+                while (true) {
+                    try {
+                        System.out.print("\nTry Again? (Y/N): ");
+                        retryChoice = scanner.next().toUpperCase().charAt(0);
+                        if (retryChoice == 'Y' || retryChoice == 'N') break;
+                        else throw new InputMismatchException();
+                    } catch (InputMismatchException e) {
+                        System.out.println("\t\tInvalid Input, Try Again!");
+                        scanner.nextLine();
+                    }
+                }
+
+                if (retryChoice == 'Y') {
+                    player.resetStats();
+                    player.resetCoolDown();
+                    continue;
+                } else {
+                    printWithDelay("\nReturning to Main Menu...\n", fastDelayPreset);
+                    return;
+                }
+            }
+        }
+
+        printWithDelay("\n==================== ARCADE COMPLETE ====================\n", fastDelayPreset);
+        printWithDelay("You defeated all the altered ego's, You are Free to Go!\n", mediumDelayPreset);
     }
+
 
 
 }
