@@ -1395,6 +1395,7 @@ public class ConsoleOutput {
                 player.reduceSkillOneCooldown();
                 player.reduceSkillTwoCooldown();
                 player.reduceSkillThreeCooldown();
+                player.randomHealthIncrease();
                 printWithDelay("\nPrepare for your next opponent!\n", fastDelayPreset);
             } else {
                 char retryChoice = ' ';

@@ -202,4 +202,12 @@ public class Player extends GameCharacter implements Skills {
         this.skillThreeCooldown = resetSkillThreeCooldown;
     }
 
+    public void randomHealthIncrease(){
+        java.util.Random random = new java.util.Random();
+        int healAmount = random.nextInt(30,41);
+        regeneration(healAmount);
+
+        System.out.println("\n" + getName() + " heals " + healAmount + " HP after the battle! (Health: " + getHitpoints() + ")");
+    }
+
 }

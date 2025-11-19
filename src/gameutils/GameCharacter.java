@@ -69,5 +69,13 @@ public abstract class GameCharacter {
         }
     }
 
+    public void regeneration (int amount){
+        if(amount <= 0) return;
+        this.hitpoints += amount;
+        if(this.hitpoints > 500){
+            this.hitpoints = 500;
+        }
+    }
+
 
 }
